@@ -5,8 +5,9 @@ INCLUDES=./includes
 
 CC=$(HOME)/opt/cross/bin/i686-elf-gcc
 AS=$(HOME)/opt/cross/bin/i686-elf-as
-CC_OPTIONS=-std=gnu99 -ffreestanding -O2 -Wall -Wextra -I $(INCLUDES)
+CC_OPTIONS=-w -std=gnu99 -ffreestanding -O2 -Wall -Wextra -I $(INCLUDES)
 AS_OPTIONS=-f elf32 -I./includes/assembly
+qemu-options=-soundhw pcspk
 NASM=nasm
 OBJ = kernel/kernel.o \
 
@@ -23,9 +24,13 @@ compile-kernel:
 	$(CC) -c kernel/IDT.c -o ./IDT.o $(CC_OPTIONS)
 	$(CC) -c kernel/ISR.c -o ./ISR.o $(CC_OPTIONS)
 	$(CC) -c kernel/IRQ.c -o ./IRQ.o $(CC_OPTIONS)
+	$(CC) -c libs/kheap.c -o ./kheap.libs.o $(CC_OPTIONS)
 	$(CC) -c kernel/timer.c -o ./timer.o $(CC_OPTIONS)
+	$(CC) -c kernel/paging.c -o ./paging.o $(CC_OPTIONS)
+	$(CC) -c libs/ordered_array.c -o ./ordered_array.o $(CC_OPTIONS)
+	$(CC) -c kernel/speaker.c -o ./speaker.o $(CC_OPTIONS)
 	$(NASM) $(AS_OPTIONS) boot/boot.s -o ./boot.o 
-	$(CC) -T boot/linker.ld -o Beez.bin -ffreestanding -O2 -nostdlib ./boot.o ./kernel.o ./console.o ./kb.o ./system.o ./string.lib.o ./cursor.driver.o ./itoa.lib.o ./GDT.o ./IDT.o ./ISR.o ./IRQ.o ./timer.o -lgcc
+	$(CC) -T boot/linker.ld -o Beez.bin -ffreestanding -O2 -nostdlib ./boot.o ./kernel.o ./console.o ./kb.o ./system.o ./string.lib.o ./cursor.driver.o ./itoa.lib.o ./GDT.o ./IDT.o ./ISR.o ./IRQ.o ./timer.o ./kheap.libs.o ./paging.o ./ordered_array.o ./speaker.o -lgcc
 	rm *.o
 
 iso: compile-kernel
@@ -39,9 +44,9 @@ clean:
 	rm -f *.o *.iso *.bin
 
 qemu-kernel: compile-kernel
-	qemu-system-i386 -kernel Beez.bin
+	qemu-system-i386 -kernel Beez.bin $(qemu-options)
 
 qemu-iso: iso
-	qemu-system-i386 -cdrom Beez.iso
+	qemu-system-i386 -cdrom Beez.iso $(qemu-options)
 qemu: iso
-	qemu-system-i386 -cdrom Beez.iso
+	qemu-system-i386 -cdrom Beez.iso $(qemu-options)

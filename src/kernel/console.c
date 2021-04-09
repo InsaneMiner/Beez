@@ -93,6 +93,7 @@ static void scroll()
        terminal_row = 24;
        update_cursor(terminal_column,terminal_row);
    }
+   
 } 
 
 void terminal_setcolor(uint8_t color) 
@@ -155,3 +156,43 @@ void prints(const char* data)
 
 
 
+void printh(uint32_t n)
+{
+    uint32_t tmp;
+
+    prints("0x");
+
+    char noZeroes = 1;
+
+    int i;
+    for (i = 28; i > 0; i -= 4)
+    {
+        tmp = (n >> i) & 0xF;
+        if (tmp == 0 && noZeroes != 0)
+        {
+            continue;
+        }
+    
+        if (tmp >= 0xA)
+        {
+            noZeroes = 0;
+            putch (tmp-0xA+'a' );
+        }
+        else
+        {
+            noZeroes = 0;
+            putch( tmp+'0' );
+        }
+    }
+  
+    tmp = n & 0xF;
+    if (tmp >= 0xA)
+    {
+        putch (tmp-0xA+'a');
+    }
+    else
+    {
+        putch (tmp+'0');
+    }
+
+}

@@ -13,3 +13,4 @@ void putch(char c);
 void terminal_write(const char* data, size_t size);
 void prints(const char* data);
 void scroll();
+void printh(uint32_t n);

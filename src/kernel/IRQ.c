@@ -1,6 +1,8 @@
 #include <kernel/system.h>
 #include <kernel/ISR.h>
 #include <libs/itoa.h>
+#include <kernel/console.h>
+
 extern void irq0();
 extern void irq1();
 extern void irq2();
@@ -78,13 +80,7 @@ void irq_install()
 
 void irq_handler(struct regs *r)
 {
-    char buf[33];
-    prints(itoa(r->int_no,buf,10));
-    /* This is a blank function pointer */
     void (*handler)(struct regs *r);
-
-    /* Find out if we have a custom handler to run for this
-    *  IRQ, and then finally, run it */
     handler = irq_routines[r->int_no - 32];
     if (handler)
     {
@@ -95,9 +91,6 @@ void irq_handler(struct regs *r)
     {
         outportb(0xA0, 0x20);
     }
-
-    /* In either case, we need to send an EOI to the master
-    *  interrupt controller too */
     outportb(0x20, 0x20);
 
 }

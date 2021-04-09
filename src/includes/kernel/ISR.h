@@ -1,3 +1,5 @@
+#pragma once
+
 struct regs
 {
     unsigned int gs, fs, es, ds;      /* pushed the segs last */

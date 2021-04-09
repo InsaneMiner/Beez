@@ -1,9 +1,14 @@
 bits 32
+
+
+extern end
+
 section .text
         align 4
         dd 0x1BADB002           
         dd 0x00                  
         dd - (0x1BADB002 + 0x00) 
+        dd end
 
 global start
 extern main	        
@@ -12,6 +17,11 @@ extern main
 %include "kernel/IDT.S"
 %include "kernel/ISR.S"
 %include "kernel/IRQ.S"
+
+
+
+
+
 
 start:
   cli 			

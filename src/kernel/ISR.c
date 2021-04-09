@@ -53,8 +53,7 @@ void fault_handler(struct regs *r)
         prints(exception_messages[r->int_no]);
         prints(" Exception. System Halted!\n");
         
-        //for (;;);
+        for (;;);
     }
-    prints(exception_messages[r->int_no]);
-    prints(" Exception. System Halted!\n");
+    
 }
