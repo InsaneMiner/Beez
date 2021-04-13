@@ -5,6 +5,29 @@
 #include <kernel/system.h>
 #include <kernel/console.h>
 
+
+
+
+
+
+
+char kb_layout[]  = {0,'1','2','3','4','5','6','7','8','9','0','-','=','\b','\b','\t','q','w','e','r','t','y','u','i','o','p','[',']','\n',0,'a','b','c','d','f','g','h','j','k','l',';','\'','`',0,0,'z','x','c','v','b','n','m',',','.','/','.','/',' '};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 enum KYBRD_ENCODER_IO {
  
 	KYBRD_ENC_INPUT_BUF	=	0x60,
@@ -94,6 +117,7 @@ string kb_input()
     {
         if(inportb(0x64) & 0x1)                 
         {
+        //putch('d');
             switch(inportb(0x60))
             { 
       /*case 1:

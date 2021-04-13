@@ -29,8 +29,12 @@ compile-kernel:
 	$(CC) -c kernel/paging.c -o ./paging.o $(CC_OPTIONS)
 	$(CC) -c libs/ordered_array.c -o ./ordered_array.o $(CC_OPTIONS)
 	$(CC) -c kernel/speaker.c -o ./speaker.o $(CC_OPTIONS)
+	$(CC) -c libs/stdclib.c -o ./stdclib.o $(CC_OPTIONS)
+	##$(CC) -c drivers/ide/ide.c -o ./ide.drivers.o $(CC_OPTIONS)
+	#$(CC) -c drivers/vga/vga.c -o ./vga.drivers.o $(CC_OPTIONS)
+	#$(CC) -c drivers/graphics/bitmap.c -o ./bitmap.drivers.o $(CC_OPTIONS)
 	$(NASM) $(AS_OPTIONS) boot/boot.s -o ./boot.o 
-	$(CC) -T boot/linker.ld -o Beez.bin -ffreestanding -O2 -nostdlib ./boot.o ./kernel.o ./console.o ./kb.o ./system.o ./string.lib.o ./cursor.driver.o ./itoa.lib.o ./GDT.o ./IDT.o ./ISR.o ./IRQ.o ./timer.o ./kheap.libs.o ./paging.o ./ordered_array.o ./speaker.o -lgcc
+	$(CC) -T boot/linker.ld -o Beez.bin -ffreestanding -O2 -nostdlib ./boot.o ./kernel.o ./console.o ./kb.o ./system.o ./string.lib.o ./cursor.driver.o ./itoa.lib.o ./GDT.o ./IDT.o ./ISR.o ./IRQ.o ./timer.o ./kheap.libs.o ./paging.o ./ordered_array.o ./speaker.o ./stdclib.o  -lgcc
 	rm *.o
 
 iso: compile-kernel

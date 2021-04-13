@@ -2,12 +2,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <drivers/cursor.h>
 #include <libs/itoa.h>
 #include <libs/stdclib.h>
+#include <drivers/cursor.h>
+#include <drivers/vga/vga.h>
 
-
-
+#include <drivers/graphics/bitmap.h>
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
 #error "You are not using a cross-compiler, you will most certainly run into trouble"
@@ -18,6 +18,10 @@
 #error "This tutorial needs to be compiled with a ix86-elf compiler"
 #endif
  
+
+char * console_text = "";
+
+
 /* Hardware text mode color constants. */
 enum vga_color {
 	VGA_COLOR_BLACK = 0,
@@ -39,16 +43,6 @@ enum vga_color {
 };
 // Scrolls the text on the screen up by one line.
 
-static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 
-{
-	return fg | bg << 4;
-}
- 
-static inline uint16_t vga_entry(unsigned char uc, uint8_t color) 
-{
-	return (uint16_t) uc | (uint16_t) color << 8;
-}
- 
 size_t strlen(const char* str) 
 {
 	size_t len = 0;
@@ -67,65 +61,61 @@ uint16_t* terminal_buffer;
  
 void terminal_initialize(void) 
 {
-	terminal_row = 0;
-	terminal_column = 0;
-	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-	terminal_buffer = (uint16_t*) 0xB8000;
-	for (size_t y = 0; y < VGA_HEIGHT; y++) {
-		for (size_t x = 0; x < VGA_WIDTH; x++) {
-			const size_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = vga_entry(' ', terminal_color);
-		}
-	}
+    terminal_column=0;
+    terminal_row=0;
+    terminal_color=2;
+    init_vga();
     init_cursor();
 }
 
 //This scrolls the screen
+/*
 static void scroll()
 {
-   uint16_t blank = vga_entry(' ',terminal_color);
+   
    if(terminal_row >= 25)
    {
        int i;
        for (i = 0*80; i < 24*80; i++)
        {
-           terminal_buffer[i] = terminal_buffer[i+80];
+           console_text[i] = console_text[i+80];
        }
        for (i = 24*80; i < 25*80; i++)
        {
-           terminal_buffer[i] = blank;
+           putch(' ');
        }
+       terminal_column = 0;
        terminal_row = 24;
        update_cursor(terminal_column,terminal_row);
    }
    
 } 
-
+*/
 void terminal_setcolor(uint8_t color) 
 {
 	terminal_color = color;
 }
  
-void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) 
-{
-	const size_t index = y * VGA_WIDTH + x;
-	terminal_buffer[index] = vga_entry(c, color);
-}
  
 void putch(char c) 
 {   if (c == '\n'){
-        ++terminal_row;
+        terminal_row += 10;
         terminal_column=0;
     }
 
     else if (c == '\b'){
-        if (terminal_column == 0){
-
+        if (terminal_column == 0 && terminal_row == 0){
+            
+        }
+        else if (terminal_column == 0){
+            terminal_row -= 10;
+            terminal_column = 320 - BITMAP_SIZE + 1;
+            
         }
         else{
-            --terminal_column;
+            terminal_column -= BITMAP_SIZE + 1;
             putch(' ');
-            --terminal_column;
+            terminal_column -= BITMAP_SIZE + 1;
         }
         
     }
@@ -139,10 +129,18 @@ void putch(char c)
 	}
 
     else{
-	    terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-        ++terminal_column;
+        if (terminal_column >= 318){
+            terminal_row +=10;
+            terminal_column=0;
+        }
+        else if( terminal_column+BITMAP_SIZE+1 >= 320 ){
+            terminal_row +=10;
+            terminal_column=0;
+        }
+        draw_char(terminal_column,terminal_row,terminal_color,c);
+        terminal_column += BITMAP_SIZE + 1;
     }
-	scroll();
+	//scroll();
     update_cursor(terminal_column,terminal_row);
 }
  
@@ -155,7 +153,6 @@ void terminal_write(const char* data, size_t size)
 void prints(const char* data) 
 {
 	terminal_write(data, strlen(data));
-    
     
 }
 

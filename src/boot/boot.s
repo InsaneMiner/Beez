@@ -17,6 +17,7 @@ extern main
 %include "kernel/IDT.S"
 %include "kernel/ISR.S"
 %include "kernel/IRQ.S"
+%include "libs/stdclib.S"
 
 
 
